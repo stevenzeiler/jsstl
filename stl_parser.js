@@ -211,35 +211,37 @@ function init() {
     directionalLight.position.normalize();
     scene.add( directionalLight );
 
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
+    function fetchStl (url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
         if ( xhr.readyState == 4 ) {
-            if ( xhr.status == 200 || xhr.status == 0 ) {
-                var rep = xhr.response; // || xhr.mozResponseArrayBuffer;
-                console.log(rep);
-                parseStlBinary(rep);
-                //parseStl(xhr.responseText);
-                mesh.rotation.x = 5;
-                mesh.rotation.z = .25;
-                console.log('done parsing');
-            }
+          if ( xhr.status == 200 || xhr.status == 0 ) {
+            var rep = xhr.response;
+            callback(rep);
+          }
         }
-    }
-    xhr.onerror = function(e) {
-        console.log(e);
-    }
+      }
+      xhr.onerror = function(e) {
+          console.log(e);
+      }
     
-    xhr.open( "GET", 'Octocat-v1.stl', true );
-    xhr.responseType = "arraybuffer";
-    //xhr.setRequestHeader("Accept","text/plain");
-    //xhr.setRequestHeader("Content-Type","text/plain");
-    //xhr.setRequestHeader('charset', 'x-user-defined');
-    xhr.send( null );
+      xhr.open( "GET", url, true );
+      xhr.responseType = "arraybuffer";
+      xhr.send( null );
+    }
+
+    fetchStl('hand_ok.stl', function (stlBinary) {
+      parseStlBinary(stlBinary);
+      mesh.rotation.x = 5;
+      mesh.rotation.z = .25;
+      console.log('done parsing');
+    });
 
     renderer = new THREE.WebGLRenderer(); //new THREE.CanvasRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     document.body.appendChild( renderer.domElement );
+    renderer.domElement.style.top = '800px';
 
     stats = new Stats();
     stats.domElement.style.position = 'absolute';
@@ -260,7 +262,10 @@ function render() {
 
     //mesh.rotation.x += 0.01;
     if (mesh) {
-        mesh.rotation.z += 0.02;
+        mesh.rotation.z += 0.01;
+        mesh.rotation.x += 0.02;
+        mesh.rotation.y += 0.03;
+
     }
     //light1.position.z -= 1;
 
