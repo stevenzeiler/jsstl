@@ -16,6 +16,7 @@ function trim (str) {
 // - STL file format: http://en.wikipedia.org/wiki/STL_(file_format)
 // - 80 byte unused header
 // - All binary STLs are assumed to be little endian, as per wiki doc
+// - Returns a THREE.Geometry
 var parseStlBinary = function(stl) {
     var geo = new THREE.Geometry();
     var dv = new DataView(stl, 80); // 80 == unused header
@@ -61,21 +62,9 @@ var parseStlBinary = function(stl) {
     // once we've assembled our geometry. This is a relatively 
     // expensive operation, but only needs to be done once.
     geo.computeFaceNormals();
-
-    mesh = new THREE.Mesh( 
-        geo,
-        // new THREE.MeshNormalMaterial({
-        //     overdraw:true
-        // }
-        new THREE.MeshLambertMaterial({
-            overdraw:true,
-            color: 0xaa0000,
-            shading: THREE.FlatShading
-        }
-    ));
-    scene.add(mesh);
-
     stl = null;
+
+    return geo;
 };  
 
 var parseStl = function(stl) {
@@ -196,7 +185,6 @@ animate();
 function init() {
 
     //Detector.addGetWebGLMessage();
-
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -231,7 +219,18 @@ function init() {
     }
 
     fetchStl('hand_ok.stl', function (stlBinary) {
-      parseStlBinary(stlBinary);
+      var geometry = parseStlBinary(stlBinary);
+      var mesh = new THREE.Mesh(geometry,
+        // new THREE.MeshNormalMaterial({
+        //     overdraw:true
+        // }
+        new THREE.MeshLambertMaterial({
+            overdraw:true,
+            color: 0xaa0000,
+            shading: THREE.FlatShading
+        })
+      );
+      scene.add(mesh);
       mesh.rotation.x = 5;
       mesh.rotation.z = .25;
       console.log('done parsing');
